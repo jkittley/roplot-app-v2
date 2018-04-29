@@ -20,6 +20,9 @@ import MenuPage from './components/MenuPage'
 
 export default {
   name: 'app',
+  created: function () {
+    this.$store.dispatch('testBLEConnection')
+  },
   computed: {
     menuIsOpen: {
       get () {

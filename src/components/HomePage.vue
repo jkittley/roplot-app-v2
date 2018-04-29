@@ -2,8 +2,12 @@
   <v-ons-page>
     <v-ons-toolbar class="home-toolbar">
       <div class="left">
-        <v-ons-toolbar-button class="btn-printer" :class="{ 'no-printer': !getSelectedPrinter }" @click="$store.commit('splitter/toggle')">
+        <v-ons-toolbar-button class="btn-printer" :class="{ 'no-printer': !hasPrinter }" @click="$store.commit('splitter/toggle')">
           <v-ons-icon icon="ion-printer, material:md-menu"></v-ons-icon>
+        </v-ons-toolbar-button>
+
+        <v-ons-toolbar-button class="btn-ble-status" :class="{ 'no-ble': !isBleAvailable }">
+          <v-ons-icon icon="ion-bluetooth, material:md-menu"></v-ons-icon>
         </v-ons-toolbar-button>
 
       </div>
@@ -14,9 +18,19 @@
       :tabs="tabs"
       :visible="true"
       :index.sync="activeIndex"
+      v-show="hasPrinter"
     >
     </v-ons-tabbar>
-
+    
+    <div v-show="!hasPrinter">
+      <div class="header" style="margin:50px;">
+      <img src="../assets/logo-w-text.svg">
+      </div>
+      <v-ons-card>
+        <v-ons-icon size="50px" icon="ion-printer"></v-ons-icon>
+        <h1>Please connect to a printer.</h1>
+      </v-ons-card>
+    </div>
 
   </v-ons-page>
 </template>
@@ -25,7 +39,6 @@
 
 import VisPage from './VisPage'
 import ConsolePage from './ConsolePage'
-import NewsPage from './NewsPage'
 import CreatePage from './CreatePage'
 
 import { mapGetters } from 'vuex'
@@ -63,15 +76,6 @@ export default {
             myProp: 'This is a page prop!'
           },
           key: 'debug'
-        },
-        {
-          icon: this.md() ? null : 'ion-ios-information-outline',
-          label: 'News & Info',
-          page: NewsPage,
-          props: {
-            myProp: 'This is a page prop!'
-          },
-          key: 'news'
         }
       ]
     }
@@ -88,7 +92,7 @@ export default {
     title () {
       return this.tabs[this.activeIndex].label
     },
-    ...mapGetters(['getSelectedPrinter'])
+    ...mapGetters(['hasPrinter', 'isBleAvailable'])
   }
 }
 </script>
@@ -100,7 +104,7 @@ export default {
 }
 
 img {
-  max-width: 300px;
+  max-height: 200px;
 }
 
 ons-list-title {
@@ -119,6 +123,10 @@ ons-list-item, ons-card {
   cursor: pointer;
 }
 
+.btn-ble-status {
+  color: rgb(51, 204, 51);
+}
+
 .btn-printer {
   color: rgb(51, 204, 51);
 }
@@ -132,6 +140,10 @@ ons-list-item, ons-card {
 .no-printer {
   color: red;
   animation: border-pulsate 2s infinite;
+}
+
+.no-ble {
+  color: red;
 }
 
 </style>
