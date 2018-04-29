@@ -2,7 +2,7 @@
   <v-ons-page>
     <v-ons-toolbar class="home-toolbar">
       <div class="left">
-        <v-ons-toolbar-button @click="$store.commit('splitter/toggle')">
+        <v-ons-toolbar-button class="btn-printer" :class="{ 'no-printer': !getSelectedPrinter }" @click="$store.commit('splitter/toggle')">
           <v-ons-icon icon="ion-printer, material:md-menu"></v-ons-icon>
         </v-ons-toolbar-button>
 
@@ -27,6 +27,8 @@ import VisPage from './VisPage'
 import ConsolePage from './ConsolePage'
 import NewsPage from './NewsPage'
 import CreatePage from './CreatePage'
+
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'home',
@@ -85,7 +87,8 @@ export default {
   computed: {
     title () {
       return this.tabs[this.activeIndex].label
-    }
+    },
+    ...mapGetters(['getSelectedPrinter'])
   }
 }
 </script>
@@ -115,4 +118,20 @@ ons-card {
 ons-list-item, ons-card {
   cursor: pointer;
 }
+
+.btn-printer {
+  color: rgb(51, 204, 51);
+}
+
+@keyframes border-pulsate {
+    0%   { color: rgba(255,20,0,0.8); }
+    50%  { color:  rgba(255,20,0,0);}
+    100% { color:  rgba(255,20,0,0.8);}
+}
+
+.no-printer {
+  color: red;
+  animation: border-pulsate 2s infinite;
+}
+
 </style>
