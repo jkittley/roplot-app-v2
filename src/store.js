@@ -23,7 +23,7 @@ const makeAlert = function (title, msg) {
 
 const modulePrinter = {
   state: {
-    alerts: [ makeAlert('Scan Error', 'Fire! lots of fire!') ],
+    alerts: [],
     selected: null,
     printers: [makePrinter(0, 'Virtual Printer', true)],
     bleAvailable: false,
@@ -33,6 +33,10 @@ const modulePrinter = {
     printProgress: 10
   },
   mutations: {
+    emptyPrinterList (state) {
+      console.log('Mutation: Emptying printer list')
+      state.printers = []
+    },
     addPrinterToList (state, printer) {
       console.log('Mutation: Adding printer')
       state.printers.push(printer)
@@ -70,8 +74,10 @@ const modulePrinter = {
   actions: {
     refreshPrinterList ({ commit }) {
       commit('setIsScanning', true)
+      commit('emptyPrinterList')
       window.ble.startScan([],
         function (device) {
+          if (!device.hasOwnProperty('name')) device.name = 'No name'
           commit('addPrinterToList', makePrinter(device.id, device.name))
         },
         function () {
@@ -154,6 +160,9 @@ const modulePrinter = {
     },
     isBleAvailable: state => {
       return state.bleAvailable
+    },
+    isScanning: state => {
+      return state.isScanning
     },
     isTestingBLE: state => {
       return state.isTestingBLE

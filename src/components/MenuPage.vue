@@ -20,7 +20,7 @@
     <br>
     <v-ons-list-title>
       <div class="left">
-        Available Printers
+        Available Devices
       </div>
     </v-ons-list-title>
     <v-ons-list>
@@ -37,12 +37,16 @@
       </v-ons-list-item>
 
       <v-ons-list-item v-if="isBleAvailable">
-          <div class="left"><v-ons-icon fixed-width icon="ion-android-refresh"></v-ons-icon></div>
-          <div class="center"><v-ons-button @click="refreshPrinterList" modifier="quiet">Refresh</v-ons-button></div>
+          <div class="right">
+            <v-ons-icon v-show="!isScanning" fixed-width icon="ion-android-refresh"></v-ons-icon>
+            <v-ons-icon v-show="isScanning" fixed-width icon="ion-android-refresh" spin></v-ons-icon>
+            <v-ons-button v-show="!isScanning" @click="refreshPrinterList" modifier="quiet">Refresh</v-ons-button>
+            <v-ons-button v-show="isScanning" modifier="quiet">Refreshing...</v-ons-button>
+          </div>
       </v-ons-list-item>
     </v-ons-list>
      
-    <v-ons-card>
+    <v-ons-card v-show="!isBleAvailable">
       <div class="title">
         BLE Connection Error
       </div>
@@ -65,7 +69,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'printer-menu',
-  computed: mapGetters(['availablePrinters', 'getPrinter', 'hasPrinter', 'isBleAvailable', 'isTestingBLE', 'isConnecting']),
+  computed: mapGetters(['availablePrinters', 'getPrinter', 'hasPrinter', 'isBleAvailable', 'isTestingBLE', 'isConnecting', 'isScanning']),
   methods: mapActions(['refreshPrinterList', 'connectToPrinter', 'disconnectPrinter', 'testBLEConnection'])
 }
 </script>

@@ -15,7 +15,10 @@
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs"
   },
   "dependencies": {
+    "cordova-android": "^7.0.0",
     "cordova-plugin-ble-central": "^1.1.4",
+    "cordova-plugin-compat": "^1.2.0",
+    "cordova-plugin-whitelist": "^1.3.3",
     "onsenui": "^2.9.1",
     "vue": "^2.5.0",
     "vue-onsenui": "^2.5.0",
@@ -103,7 +106,11 @@
     "plugins": {
       "cordova-plugin-ble-central": {
         "BLUETOOTH_USAGE_DESCRIPTION": "Connection to printer"
-      }
-    }
+      },
+      "cordova-plugin-whitelist": {}
+    },
+    "platforms": [
+      "android"
+    ]
   }
 }

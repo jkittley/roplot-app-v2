@@ -19,15 +19,13 @@
           target="#btn-alerts"
           direction="down"
           @posthide="markAlerts">
-          <v-ons-toolbar>
-            <div class="center">Alerts</div>
-          </v-ons-toolbar>
-          <p style="text-align: center; margin-top:50px;">
-             <div class="content alert-message" v-for="alert in getAlerts" v-bind:key="alert.key">
-                <strong>{{ alert.title }}</strong><br>
-                {{ alert.text }}
-            </div>
-          </p>
+          
+          <div class="popover-title">Alerts</div>
+          <div class="content alert-message" v-for="alert in getAlerts" v-bind:key="alert.key">
+              <strong>{{ alert.title }}</strong><br>
+              {{ alert.text }}
+          </div>
+      
           <p class="content alert-message" v-if="getAlerts.length===0">
             No messages
           </p>
@@ -195,6 +193,7 @@ ons-list-item, ons-card {
 
 .alert-message {
   padding: 10px;
+  background-color: #eee;
 }
 
 ons-toolbar-button {
@@ -211,4 +210,12 @@ ons-toolbar-button {
   padding: 0;
   margin: 0;
 }
+
+.popover-title {
+  padding: 15px;
+  text-align: center;
+  font-weight: 800;
+}
+
+
 </style>

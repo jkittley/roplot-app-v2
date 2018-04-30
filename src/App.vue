@@ -20,7 +20,7 @@ import MenuPage from './components/MenuPage'
 
 export default {
   name: 'app',
-  created: function () {
+  mounted: function () {
     this.$store.dispatch('testBLEConnection')
   },
   computed: {
