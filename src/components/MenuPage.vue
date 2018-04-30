@@ -33,7 +33,7 @@
           <v-ons-icon fixed-width icon="ion-refresh" spin></v-ons-icon> 
           </div>
         <div class="center">{{ item.name }}</div>
-        <div class="right"><v-ons-button @click="connectToPrinter(item)" modifier="quiet">Connect</v-ons-button></div>
+        <div class="right"><v-ons-button v-show="!isConnecting && !hasPrinter" @click="connectToPrinter(item)" modifier="quiet">Connect</v-ons-button></div>
       </v-ons-list-item>
 
       <v-ons-list-item v-if="isBleAvailable">
@@ -48,6 +48,12 @@
       </div>
       <div class="content">
         No Bluetooth Low Energy (BLE) connection is available. Please make sure Bluetooth is enabled in your devices settings.
+        <br><br>
+        <v-ons-button v-if="!isTestingBLE" @click="testBLEConnection">Test for BLE Again</v-ons-button>
+        <v-ons-button v-else modifier="outline">
+          <v-ons-icon fixed-width icon="ion-refresh" spin></v-ons-icon> 
+            Testing for BLE...
+          </v-ons-button>
       </div>
     </v-ons-card>
 
@@ -59,8 +65,8 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'printer-menu',
-  computed: mapGetters(['availablePrinters', 'getPrinter', 'hasPrinter', 'isBleAvailable']),
-  methods: mapActions(['refreshPrinterList', 'connectToPrinter', 'disconnectPrinter'])
+  computed: mapGetters(['availablePrinters', 'getPrinter', 'hasPrinter', 'isBleAvailable', 'isTestingBLE', 'isConnecting']),
+  methods: mapActions(['refreshPrinterList', 'connectToPrinter', 'disconnectPrinter', 'testBLEConnection'])
 }
 </script>
 

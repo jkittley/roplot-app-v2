@@ -3,25 +3,47 @@
     <v-ons-toolbar class="home-toolbar">
       <div class="left">
         <v-ons-toolbar-button class="btn-printer" :class="{ 'no-printer': !hasPrinter }" @click="$store.commit('splitter/toggle')">
-          <v-ons-icon icon="ion-printer, material:md-menu"></v-ons-icon>
+          <v-ons-icon icon="ion-printer"></v-ons-icon>
         </v-ons-toolbar-button>
 
-        <v-ons-toolbar-button class="btn-ble-status" :class="{ 'no-ble': !isBleAvailable }">
-          <v-ons-icon icon="ion-bluetooth, material:md-menu"></v-ons-icon>
+        <v-ons-toolbar-button class="btn-ble-status" :class="{ 'no-ble': !isBleAvailable }" @click="$store.commit('splitter/toggle')">
+          <v-ons-icon icon="ion-bluetooth"></v-ons-icon>
         </v-ons-toolbar-button>
 
+        <v-ons-toolbar-button id="btn-alerts" class="btn-alerts" :class="{ 'no-alerts': !hasUnseenAlerts }" @click="showAlerts">
+          <v-ons-icon icon="ion-alert-circled"></v-ons-icon>
+          <span v-if="countUnseenAlerts>0" class="notification">{{ countUnseenAlerts }}</span>
+        </v-ons-toolbar-button>
+        <v-ons-popover cancelable
+          :visible.sync="alertsDialogVisible"
+          target="#btn-alerts"
+          direction="down"
+          @posthide="markAlerts">
+          <v-ons-toolbar>
+            <div class="center">Alerts</div>
+          </v-ons-toolbar>
+          <p style="text-align: center; margin-top:50px;">
+             <div class="content alert-message" v-for="alert in getAlerts" v-bind:key="alert.key">
+                <strong>{{ alert.title }}</strong><br>
+                {{ alert.text }}
+            </div>
+          </p>
+          <p class="content alert-message" v-if="getAlerts.length===0">
+            No messages
+          </p>
+        </v-ons-popover>
+        
       </div>
       <div class="center">{{ msg }}</div>
     </v-ons-toolbar>
 
     <v-ons-tabbar swipeable position="auto"
       :tabs="tabs"
-      :visible="true"
-      :index.sync="activeIndex"
       v-show="hasPrinter"
+      :index.sync="activeIndex"
     >
     </v-ons-tabbar>
-    
+
     <div v-show="!hasPrinter">
       <div class="header" style="margin:50px;">
       <img src="../assets/logo-w-text.svg">
@@ -41,13 +63,14 @@ import VisPage from './VisPage'
 import ConsolePage from './ConsolePage'
 import CreatePage from './CreatePage'
 
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'home',
   data () {
     return {
       msg: 'Roplot',
+      alertsDialogVisible: false,
       activeIndex: 0,
       tabs: [
         {
@@ -57,7 +80,8 @@ export default {
           props: {
             myProp: 'This is a page prop!'
           },
-          key: 'create'
+          key: 'create',
+          visible: false
         },
         {
           icon: this.md() ? null : 'ion-ios-printer-outline',
@@ -81,18 +105,24 @@ export default {
     }
   },
   methods: {
-    goTo (url) {
-      window.open(url, '_blank')
-    },
+    ...mapActions(['markAllAlertsAsSeen']),
     md () {
       return this.$ons.platform.isAndroid()
+    },
+    showAlerts: function (event) {
+      this.alertsDialogVisible = true
+    },
+    markAlerts: function (event) {
+      if (event) {
+        this.markAllAlertsAsSeen()
+      }
     }
   },
   computed: {
     title () {
       return this.tabs[this.activeIndex].label
     },
-    ...mapGetters(['hasPrinter', 'isBleAvailable'])
+    ...mapGetters(['hasPrinter', 'isBleAvailable', 'hasUnseenAlerts', 'getAlerts', 'countUnseenAlerts'])
   }
 }
 </script>
@@ -131,7 +161,7 @@ ons-list-item, ons-card {
   color: rgb(51, 204, 51);
 }
 
-@keyframes border-pulsate {
+@keyframes danger-pulsate {
     0%   { color: rgba(255,20,0,0.8); }
     50%  { color:  rgba(255,20,0,0);}
     100% { color:  rgba(255,20,0,0.8);}
@@ -139,11 +169,46 @@ ons-list-item, ons-card {
 
 .no-printer {
   color: red;
-  animation: border-pulsate 2s infinite;
+  animation: danger-pulsate 2s infinite;
 }
 
 .no-ble {
   color: red;
 }
 
+
+@keyframes warning-pulsate {
+    0%   { color: rgba(255,165,0,1); }
+    50%  { color: rgba(255,165,0,0);}
+    100% { color: rgba(255,165,0,1);}
+}
+
+.btn-alerts {
+  color: orange;
+  animation: warning-pulsate 2s infinite;
+}
+
+.no-alerts {
+  color: #ccc;
+  animation: none;
+}
+
+.alert-message {
+  padding: 10px;
+}
+
+ons-toolbar-button {
+  position: relative;
+}
+
+.notification {
+  position: absolute;
+  top: 0;
+  right:0;
+  height: 15px;
+  width: 15px;
+  font-size: 8px;
+  padding: 0;
+  margin: 0;
+}
 </style>
