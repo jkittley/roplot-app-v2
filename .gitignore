@@ -9,6 +9,7 @@ yarn-error.log*
 selenium-debug.log
 plugins/
 platforms/
+www/
 
 # Editor directories and files
 .idea
