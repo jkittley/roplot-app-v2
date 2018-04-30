@@ -1,16 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import Printer from './printer'
 
 Vue.use(Vuex)
-
-const makePrinter = function (id, name, isVirtual = false) {
-  return {
-    name: name,
-    isConnecting: false,
-    id: id,
-    isVirtual: isVirtual
-  }
-}
 
 const makeAlert = function (title, msg) {
   return {
@@ -25,7 +17,7 @@ const modulePrinter = {
   state: {
     alerts: [],
     selected: null,
-    printers: [makePrinter(0, 'Virtual Printer', true)],
+    printers: [new Printer(window.ble, 0, 'Virtual Printer', true)],
     bleAvailable: false,
     isTestingBLE: false,
     isScanning: false,
@@ -78,34 +70,48 @@ const modulePrinter = {
       window.ble.startScan([],
         function (device) {
           if (!device.hasOwnProperty('name')) device.name = 'No name'
-          commit('addPrinterToList', makePrinter(device.id, device.name))
+          commit('addPrinterToList', new Printer(window.ble, device.id, device.name, false))
         },
         function () {
           commit('setIsScanning', false)
         })
-        // Stop after timeout
+      // Stop after timeout
       setTimeout(window.ble.stopScan,
-            10000,
-            function () {
-              commit('setIsScanning', false)
-            },
-            function () {
-              commit('setIsScanning', false)
-              commit('addError', makeAlert('BLE Scan Error', 'Failed to stop scanning'))
-            }
+          10000,
+          function () {
+            commit('setIsScanning', false)
+          },
+          function () {
+            commit('setIsScanning', false)
+            commit('addAlert', makeAlert('Scan Error', 'Failed to stop scanning'))
+          }
       )
       console.log('Action: Refreshing printer list')
     },
     connectToPrinter ({ commit }, printer) {
-      console.log('Action: Connecting to printer')
+      console.log('Action: Connecting to printer', printer)
       printer.isConnecting = true
-      setTimeout(function () {
-        commit('setSelectedPrinter', printer)
-      }, 2000)
+      printer.connect(
+        function () {
+          // If connection succeeds
+          commit('setSelectedPrinter', printer)
+        },
+        function () {
+          // If connect fails
+          commit('addAlert', makeAlert('Connection Error', 'Failed to connect'))
+        },
+        function () {
+          // If connection succeeds, but later connection fails
+          commit('addAlert', makeAlert('Connection Error', 'The connection to the printer has failed'))
+        }
+      )
     },
-    disconnectPrinter ({ commit }) {
+    disconnectPrinter ({ commit, state }) {
       console.log('Action: Disconnecting printer')
-      commit('unsetSelectedPrinter')
+      state.selected.disconnect(function (error) {
+        if (error) commit('addAlert', makeAlert('Disconnection Error', 'Failed to verify disconnection'))
+        commit('unsetSelectedPrinter')
+      })
     },
     testBLEConnection ({ commit }) {
       console.log('Action: Testing BLE connection')
