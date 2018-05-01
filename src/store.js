@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import Printer from './printer'
+import * as CHAT from './assets/rolang-chat'
 
 Vue.use(Vuex)
 
@@ -22,7 +23,8 @@ const modulePrinter = {
     isTestingBLE: false,
     isScanning: false,
     isPrinting: false,
-    printProgress: 10
+    printProgress: 10,
+    printUpdates: []
   },
   mutations: {
     emptyPrinterList (state) {
@@ -61,6 +63,10 @@ const modulePrinter = {
     setAlertSeenTo (state, payload) {
       console.log('Mutation: setAlertSeenTo:', payload)
       payload.alert.seen = payload.value
+    },
+    addPrintUpdate (state, payload) {
+      console.log('Mutation: addPrintUpdate:', payload)
+      state.printUpdates.push(payload)
     }
   },
   actions: {
@@ -104,9 +110,10 @@ const modulePrinter = {
           // If connection succeeds, but later connection fails
           commit('addAlert', makeAlert('Connection Error', 'The connection to the printer has failed'))
         },
-        function (data) {
+        function (command) {
           // When data comes in
-          console.log('New Data', data)
+          console.log('New Data', command)
+          if (command.getType() === CHAT.cmdPrintProgress) commit('addPrintUpdate', command)
         }
       )
     },
@@ -140,6 +147,10 @@ const modulePrinter = {
       for (let item of state.alerts) {
         commit('setAlertSeenTo', { alert: item, value: true })
       }
+    },
+    sendCommand: function ({ commit, state }, command, waitForResponse = false) {
+      console.log('Action: Sending command', command, 'waitForResponse:', waitForResponse)
+      state.selected.sendCommand(command)
     }
   },
   getters: {
@@ -197,6 +208,9 @@ const modulePrinter = {
       if (state.selected === null) return false
       if (state.selected.config === null) return false
       return true
+    },
+    getPrinterUpdates: state => {
+      return state.printUpdates
     }
   }
 }

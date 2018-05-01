@@ -1,3 +1,6 @@
+import RAT from './assets/rolang-rat'
+import * as CHAT from './assets/rolang-chat'
+
 const bluefruit = {
   serviceUUID: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
   txCharacteristic: '6e400002-b5a3-f393-e0a9-e50e24dcca9e', // transmit is from the phone's perspective
@@ -86,26 +89,24 @@ class Printer {
   // Request the printer configuration
   requestConfiguration (cb = null) {
     console.log('Printer configuration requested')
-    // Virtual Printer
-    if (this.isVirtual) {
-      setTimeout(function () {
-        this._sendVirtualCommand('getConfig', cb)
-      }.bind(this), 1000)
-      return
-    }
-    // Real Printer
-    this.sendCommand('getconfig', cb)
+    var cmd = new CHAT.Command(CHAT.cmdGetConfig, null)
+    this.sendCommand(cmd, cb)
   }
 
   sendCommand (command, cb = null) {
-    console.log('Sending command: ', command)
-    var cmd = JSON.stringify({'type': command})
-    console.log('sending command: ', cmd, ' to: ', this.id)
+    // Virtual Printer
+    if (this.isVirtual) {
+      this._sendVirtualCommand(command, cb)
+      return
+    }
+    // Real printer
+    console.log('Sending command: ', command, ' to: ', this.id)
+
     this.ble.write(
       this.id,
       bluefruit.serviceUUID,
       bluefruit.txCharacteristic,
-      this.stringToBytes(cmd),
+      this.stringToBytes(command.toString()),
       function (e) {
         console.log('ACK')
         if (cb !== null) cb(e, true)
@@ -119,8 +120,12 @@ class Printer {
 
   _sendVirtualCommand (command, cb = null) {
     console.log('Sending virtual command: ', command)
-    if (command === 'getConfig') {
-      var data = JSON.stringify({
+
+    // Callback to say command sent
+    if (cb !== null) cb()
+
+    if (command.type.toLowerCase() === 'getconfig') {
+      var fakeResponseData = JSON.stringify({
         'type': 'printerConfig',
         'rotationSpeed': 10,
         'beltSpeed': 10,
@@ -157,9 +162,35 @@ class Printer {
           'LabelInterval': 15   // Interval in degrees between tick labels
         }
       })
-      this._onData(this.stringToBytes(data))
+      // Time delay fake response
+      setTimeout(function () {
+        var cmd = CHAT.command(CHAT.cmdGetConfig, fakeResponseData)
+        this._onData(this.stringToBytes(cmd.toString()))
+      }.bind(this), 1000)
+      //
+    } else if (command.type.toLowerCase() === 'rat') {
+      //
+      var instructions = RAT.parse(command.rat)
+      var unpacked = RAT.unpack(instructions)
+
+      this._onData(this.stringToBytes(JSON.stringify({
+        type: 'startedPrinting',
+        count: instructions.length
+      })))
+
+      var i = unpacked.length
+      var ticker = setInterval(function () {
+        if (i === 0) clearInterval(ticker)
+        var instruction = unpacked[i]
+        this._onData(this.stringToBytes(JSON.stringify({
+          type: 'progressUpd',
+          rat: instruction,
+          i: i,
+          count: unpacked.length
+        })))
+        i--
+      }.bind(this), 500)
     }
-    if (cb !== null) cb()
   }
 
   _onData (data) {
@@ -171,7 +202,7 @@ class Printer {
     if (numOpenBraces === numCloseBraces) {
       try {
         console.log(this.data)
-        this._processData(JSON.parse(this.data))
+        this._processData(this.data)
       } catch (e) {
         console.log('Parse error', e)
       } finally {
@@ -183,14 +214,14 @@ class Printer {
   }
 
   _processData (data) {
-    console.log('Processing data: ', data)
+    var cmd = CHAT.command.fromString(data)
+    console.log('Processing received command: ', cmd)
     // Handle internal messages
-    if (data.type === 'printerConfig') {
-      this.config = data
-      delete this.config['type']
+    if (cmd.getType() === CHAT.cmdGetConfig) {
+      this.config = cmd.getData()
     }
     // Pass data to external handler
-    if (this.dataCallback !== null) this.dataCallback(data)
+    if (this.dataCallback !== null) this.dataCallback(cmd)
   }
 
   _determineWriteType (peripheral) {

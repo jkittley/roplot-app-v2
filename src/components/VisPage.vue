@@ -9,7 +9,7 @@
       </v-ons-col>
       
       <v-ons-col v-if="hasPrinterConfig">
-        <roplot-visualiser v-bind:printer="getPrinter"></roplot-visualiser>    
+        <roplot-visualiser v-bind:printer="getPrinter" v-bind:updates="updates" ></roplot-visualiser>    
       </v-ons-col>
 
       <v-ons-col v-if="hasPrinter && !hasPrinterConfig">
@@ -28,21 +28,33 @@
             <div class="manual-controls">
               <v-ons-row vertical-align="top">
                <v-ons-col width="33%"></v-ons-col>
-               <v-ons-col width="33%"><v-ons-button class="btn-dir"><v-ons-icon icon="fa-arrow-up"></v-ons-icon></v-ons-button></v-ons-col>
+               <v-ons-col width="33%"><v-ons-button @click="carOut" class="btn-dir"><v-ons-icon icon="fa-arrow-up"></v-ons-icon></v-ons-button></v-ons-col>
               </v-ons-row> 
               <v-ons-row vertical-align="top">
-                <v-ons-col width="33%"><v-ons-button class="btn-dir"><v-ons-icon icon="fa-undo"></v-ons-icon></v-ons-button></v-ons-col>
-                <v-ons-col width="33%"><v-ons-button class="btn-set"><v-ons-icon icon="fa-dot-circle-o"></v-ons-icon></v-ons-button></v-ons-col>
-                <v-ons-col width="33%"><v-ons-button class="btn-dir"><v-ons-icon icon="fa-repeat"></v-ons-icon></v-ons-button></v-ons-col>
+                <v-ons-col width="33%"><v-ons-button @click="rotateCCW" class="btn-dir"><v-ons-icon icon="fa-undo"></v-ons-icon></v-ons-button></v-ons-col>
+                <v-ons-col width="33%"><v-ons-button @click="center" class="btn-set"><v-ons-icon icon="fa-dot-circle-o"></v-ons-icon></v-ons-button></v-ons-col>
+                <v-ons-col width="33%"><v-ons-button @click="rotateCW" class="btn-dir"><v-ons-icon icon="fa-repeat"></v-ons-icon></v-ons-button></v-ons-col>
               </v-ons-row>
               <v-ons-row vertical-align="top">
                 <v-ons-col width="33%"></v-ons-col>
-                <v-ons-col width="33%"><v-ons-button class="btn-dir"><v-ons-icon icon="fa-arrow-down"></v-ons-icon></v-ons-button></v-ons-col>
+                <v-ons-col width="33%"><v-ons-button @click="carIn" class="btn-dir"><v-ons-icon icon="fa-arrow-down"></v-ons-icon></v-ons-button></v-ons-col>
               </v-ons-row>
               <br><br>
-              <v-ons-button class="btn-pen" v-for="pen in getPrinterConfig.pens" v-bind:key="pen.id">
-                <v-ons-icon icon="fa-pencil" fixed-width></v-ons-icon> {{ pen.pole }} {{ pen.color }}
-              </v-ons-button>
+              <v-ons-row vertical-align="top" v-for="pen in getPrinterConfig.pens" v-bind:key="pen.id" >
+                <v-ons-col width="100%">
+                  {{ pen.pole }} {{ pen.color }}
+                </v-ons-col>
+                <v-ons-col width="50%">
+                  <v-ons-button class="btn-pen" @click="penUp(pen.id)">
+                     <v-ons-icon icon="fa-arrow-up" fixed-width></v-ons-icon> 
+                  </v-ons-button>
+                </v-ons-col>
+                <v-ons-col width="50%">
+                  <v-ons-button class="btn-pen" @click="penDown(pen.id)">
+                     <v-ons-icon icon="fa-arrow-down" fixed-width></v-ons-icon> 
+                  </v-ons-button>
+                </v-ons-col>
+              </v-ons-row>
 
             </div>
           </div>
@@ -75,17 +87,56 @@
 
 <script>
 
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import RoplotVisualiser from './RoplotVisualiser'
 import PleaseConnect from './PleaseConnect'
+import * as CHAT from '../assets/rolang-chat'
 
 export default {
   name: 'vis',
-  props: ['myProp'],
+  data: function () {
+    return {
+      updates: []
+    }
+  },
   computed: mapGetters(['hasPrinter', 'getPrinter', 'getPrintProgress', 'getPrinterConfig', 'hasPrinterConfig', 'isPrinting']),
   components: {
     RoplotVisualiser,
     PleaseConnect
+  },
+  methods: {
+    ...mapActions(['sendCommand']),
+    rotateCW () {
+      var cmd = CHAT.command(CHAT.cmdRAT, ['RC','RC','RC','RC','RC','RC'])
+      this.sendCommand(cmd)
+    },
+    rotateCCW () {
+      var cmd = CHAT.command(CHAT.cmdRAT, ['RA'])
+      this.sendCommand(cmd)
+    },
+    carOut () {
+      var cmd = CHAT.command(CHAT.cmdRAT, ['CO'])
+      this.sendCommand(cmd)
+    },
+    carIn () {
+      var cmd = CHAT.command(CHAT.cmdRAT, ['CI'])
+      this.sendCommand(cmd)
+    },
+    center () {
+      // this.getPrinter().sendCommand('')
+    },
+    penUp (penID) {
+      var cmd = CHAT.command(CHAT.cmdRAT, ['PU:' + penID])
+      this.sendCommand(cmd)
+    },
+    penDown (penID) {
+      var cmd = CHAT.command(CHAT.cmdRAT, ['PD:' + penID])
+      this.sendCommand(cmd)
+    },
+    stop () {
+      var cmd = CHAT.command(CHAT.cmdStop, null)
+      this.sendCommand(cmd)
+    }
   }
 }
 </script>

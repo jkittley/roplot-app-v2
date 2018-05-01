@@ -2,6 +2,7 @@
  * Created by jacob on 20/06/2016.
  */
 import * as d3 from 'd3'
+import RAT from './rolang-rat'
 
 const CAR_OUT = 1
 const CAR_IN = 2
@@ -388,32 +389,9 @@ class RoplotVis {
   }
 
   run (cmdStr) {
-    var re = new RegExp('((?<repeats>\d+)\*)?(?<cmd>PU|PD|RC|RA|CO|CI)(:(?<param>\d+))?')
+    console.log('Running RAT', cmdStr)
 
-    var parsedInstructions = []
-    var errors = []
-    cmdStr.split(',').forEach(function (instruction, i) {
-      instruction = instruction.trim()
-      if (instruction === '') return true
-
-      var parsed = instruction.match(re)
-      if (parsed === null) {
-        var e = 'Unable to parse command: ' + instruction + ' (#' + i + ')'
-        console.log(e)
-        errors.push(e)
-        return false
-      }
-      console.log(parsed)
-      var parsedDict = parsed.groups
-      parsedDict.repeats = (parsedDict.repeats === undefined) ? 1 : Number.parseInt(parsedDict.repeats)
-      parsedDict.param = (parsedDict.param === undefined) ? null : Number.parseInt(parsedDict.param)
-      parsedInstructions.push(parsedDict)
-    })
-
-    if (errors.length > 0) {
-      console.log(errors)
-      return errors
-    }
+    var parsedInstructions = RAT.parse(cmdStr)
 
     // Execute parsed instructions
     parsedInstructions.forEach(function (instruction, i) {
