@@ -3,17 +3,20 @@
 
     <please-connect v-if="!hasPrinter"></please-connect>
     
-    <p v-else style="text-align: center">
+    <div v-show="hasPrinter" style="text-align: center">
       Console
-    </p>
+    </div>
+
   </v-ons-page>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import PleaseConnect from './PleaseConnect'
 
 export default {
   name: 'console',
+  computed: mapGetters(['hasPrinter']),
   components: {
     PleaseConnect
   }
