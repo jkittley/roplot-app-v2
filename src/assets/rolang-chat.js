@@ -14,7 +14,7 @@ class Command {
       d: data
     }
   }
-  
+
   static fromJson (json) {
     return new this(json.t, json.d)
   }
@@ -42,8 +42,10 @@ class Command {
   //
 }
 
-export default {
+export {
   Command,
   cmdGetConfig,
-  cmdPrintProgress
+  cmdPrintProgress,
+  cmdRAT,
+  cmdStop
 }

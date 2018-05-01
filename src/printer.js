@@ -1,5 +1,5 @@
 import RAT from './assets/rolang-rat'
-import * as CHAT from './assets/rolang-chat'
+import { Command, cmdGetConfig } from './assets/rolang-chat'
 
 const bluefruit = {
   serviceUUID: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
@@ -89,7 +89,7 @@ class Printer {
   // Request the printer configuration
   requestConfiguration (cb = null) {
     console.log('Printer configuration requested')
-    var cmd = new CHAT.Command(CHAT.cmdGetConfig, null)
+    var cmd = new Command(cmdGetConfig, null)
     this.sendCommand(cmd, cb)
   }
 
@@ -164,7 +164,7 @@ class Printer {
       })
       // Time delay fake response
       setTimeout(function () {
-        var cmd = CHAT.command(CHAT.cmdGetConfig, fakeResponseData)
+        var cmd = new Command(cmdGetConfig, fakeResponseData)
         this._onData(this.stringToBytes(cmd.toString()))
       }.bind(this), 1000)
       //
@@ -214,10 +214,10 @@ class Printer {
   }
 
   _processData (data) {
-    var cmd = CHAT.command.fromString(data)
+    var cmd = Command.fromString(data)
     console.log('Processing received command: ', cmd)
     // Handle internal messages
-    if (cmd.getType() === CHAT.cmdGetConfig) {
+    if (cmd.getType() === cmdGetConfig) {
       this.config = cmd.getData()
     }
     // Pass data to external handler
