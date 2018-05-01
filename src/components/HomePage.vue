@@ -72,6 +72,15 @@ export default {
       activeIndex: 0,
       tabs: [
         {
+          icon: this.md() ? null : 'ion-ios-printer-outline',
+          label: 'Print',
+          page: VisPage,
+          props: {
+            myProp: 'This is a page prop!'
+          },
+          key: 'print'
+        },
+        {
           icon: this.md() ? null : 'ion-paintbrush',
           label: 'Create',
           page: CreatePage,
@@ -80,15 +89,6 @@ export default {
           },
           key: 'create',
           visible: false
-        },
-        {
-          icon: this.md() ? null : 'ion-ios-printer-outline',
-          label: 'Print',
-          page: VisPage,
-          props: {
-            myProp: 'This is a page prop!'
-          },
-          key: 'print'
         },
         {
           icon: this.md() ? null : 'ion-bug',

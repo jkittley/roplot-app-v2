@@ -1,11 +1,18 @@
 <template>
   <v-ons-page>
- 
+
+    
     <v-ons-row vertical-align="top">
 
-      <v-ons-col>Col 1</v-ons-col>
+      <v-ons-col v-if="hasPrinterConfig">
+        <roplot-visualiser v-bind:printer="getPrinter"></roplot-visualiser>    
+      </v-ons-col>
 
-      <v-ons-col v-if="!isPrinting" width="250px" vertical-align="top">
+      <v-ons-col v-if="!hasPrinterConfig">
+        Waiting for printer configuration...
+      </v-ons-col>
+
+      <v-ons-col v-if="!isPrinting && hasPrinterConfig" width="250px" vertical-align="top">
          <v-ons-card>
           <div class="title">
             Manual Control
@@ -53,12 +60,17 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+
+import { mapGetters } from 'vuex'
+import RoplotVisualiser from './RoplotVisualiser'
+
 export default {
   name: 'vis',
   props: ['myProp'],
-  computed: mapGetters(['getPrintProgress']),
-  methods: mapActions(['isPrinting'])
+  computed: mapGetters(['getPrinter', 'getPrintProgress', 'getPrinterConfig', 'hasPrinterConfig', 'isPrinting']),
+  components: {
+    RoplotVisualiser
+  }
 }
 </script>
 
@@ -91,5 +103,12 @@ export default {
 }
 .printing-controls ons-button ons-icon {
   padding-bottom: 8px;
+}
+roplot-visualiser, ons-col, ons-row {
+  width: 100%;
+  height: 100%;
+}
+ons-col {
+  padding: 10px;
 }
 </style>

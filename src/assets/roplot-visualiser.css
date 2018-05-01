@@ -1,0 +1,40 @@
+.roplot {
+    min-width: 200px;
+    min-height: 200px;
+}
+
+.roplot .drawable-area {
+    fill: #e5f6ff;
+}
+
+.roplot .hub {
+    fill: #f7f7f7
+}
+
+.roplot .mouse-line {
+    stroke: #ccc;
+    stroke-width: 3px;
+    stroke-dasharray: 10;
+    stroke-linecap: round;
+}
+
+.roplot .carriage {
+    fill: #000;
+}
+
+.roplot .draw-surface {
+    fill: white;
+}
+
+.roplot .degree-tick {
+    stroke: #eee;
+    stroke-width: 2px;
+}
+
+.roplot .degree-label {
+    fill: #eee;
+}
+
+.roplot .boom-angle-marker {
+    fill: #eee;
+}
