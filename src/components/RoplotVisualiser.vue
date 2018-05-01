@@ -3,21 +3,31 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import RoplotVis from '../assets/roplot-visualiser'
 
 export default {
   props: ['printer'],
   data: function () {
     return {
-      count: 0
+      plot: null
     }
   },
   mounted () {
-    var plot = new RoplotVis(this.$refs.vis, {})
+    this.plot = new RoplotVis(this.$refs.vis, {})
     this.$refs.vis.addEventListener('click', function (event) {
       console.log(event, event.roplot)
     })
-    plot.run('50*RA')
+  },
+  computed: mapGetters(['getPrinterUpdates']),
+  watch: {
+    getPrinterUpdates: function (val) {
+      var upd = val[val.length - 1]
+      console.log('Updating plot', upd)
+      if (upd.hasOwnProperty('type') && upd.type.toLowerCase() === 'progressupd') {
+        this.plot.run(upd.rat)
+      }
+    }
   }
 }
 </script>
