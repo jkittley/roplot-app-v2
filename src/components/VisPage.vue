@@ -5,13 +5,7 @@
     <v-ons-row vertical-align="top">
 
       <v-ons-col v-if="!hasPrinter">
-      <div class="header" style="margin:50px;">
-      <img src="../assets/logo-w-text.svg">
-      </div>
-      <v-ons-card class="header">
-        <v-ons-icon size="50px" icon="ion-printer"></v-ons-icon>
-        <h1>Please connect to a printer.</h1>
-      </v-ons-card>
+        <please-connect></please-connect>
       </v-ons-col>
       
       <v-ons-col v-if="hasPrinterConfig">
@@ -83,13 +77,15 @@
 
 import { mapGetters } from 'vuex'
 import RoplotVisualiser from './RoplotVisualiser'
+import PleaseConnect from './PleaseConnect'
 
 export default {
   name: 'vis',
   props: ['myProp'],
   computed: mapGetters(['hasPrinter', 'getPrinter', 'getPrintProgress', 'getPrinterConfig', 'hasPrinterConfig', 'isPrinting']),
   components: {
-    RoplotVisualiser
+    RoplotVisualiser,
+    PleaseConnect
   }
 }
 </script>

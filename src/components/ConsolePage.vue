@@ -1,14 +1,21 @@
 <template>
   <v-ons-page>
-    <p style="text-align: center">
+
+    <please-connect v-if="!hasPrinter"></please-connect>
+    
+    <p v-else style="text-align: center">
       Console
     </p>
   </v-ons-page>
 </template>
 
 <script>
+import PleaseConnect from './PleaseConnect'
+
 export default {
   name: 'console',
-  props: ['myProp']
+  components: {
+    PleaseConnect
+  }
 }
 </script>
