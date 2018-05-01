@@ -14,18 +14,13 @@ class Printer {
     this.data = ''
     this.writeMethod = null
     this.isVirtual = isVirtual
+    this.dataCallback = null
+    this.config = null
   }
 
-  _determineWriteType (peripheral) {
-    var characteristic = peripheral.characteristics.filter(function (element) {
-      if (element.characteristic.toLowerCase() === bluefruit.txCharacteristic) {
-        return element
-      }
-    })[0]
-    this.writeMethod = (characteristic.properties.indexOf('WriteWithoutResponse') > -1) ? this.ble.writeWithoutResponse : this.ble.write
-  }
-
-  connect (cbConnect = null, cbConnectFail = null, cbDisconnect = null) {
+  connect (cbConnect = null, cbConnectFail = null, cbDisconnect = null, cbData = null) {
+    console.log('Connecting to printer: ', this.id)
+    this.dataCallback = cbData
     this.isConnected = false
     this.isConnecting = true
     // Virtual Printer
@@ -33,10 +28,14 @@ class Printer {
       setTimeout(function () {
         this.isConnected = true
         this.isConnecting = false
+        // Get the config details
+        this.requestConfiguration()
+        // Notify connection made
         cbConnect()
-      }, 2000)
+      }.bind(this), 2000)
       return
     }
+
     // Real Printer
     var onConnect = function (peripheral) {
       this.isConnecting = false
@@ -45,9 +44,9 @@ class Printer {
         this.ble.startNotification(this.id, bluefruit.serviceUUID, bluefruit.rxCharacteristic, this._onData.bind(this), cbDisconnect.bind(this))
         this.isConnected = true
         // Get the config details
-        // this.requestConfig(function () {
+        this.requestConfiguration()
+        // Notify connection made
         if (cbConnect !== null) cbConnect()
-        // })
       } catch (error) {
         console.log('error', error)
         this.isConnecting = false
@@ -60,27 +59,6 @@ class Printer {
       if (cbDisconnect !== null) cbDisconnect()
     }.bind(this)
     this.ble.connect(this.id, onConnect, onDisconnect)
-  }
-
-  _onData (data) {
-    // Append data and remove all newlines, tabs, etc.
-    this.data += this.bytesToString(data).replace(/(\r\n\t|\n|\r\t)/gm, '')
-    var numOpenBraces = (this.data.match(/{/g) || []).length
-    var numCloseBraces = (this.data.match(/}/g) || []).length
-    // If the string is a complete json sting i.e. num of { == num of }
-    if (numOpenBraces === numCloseBraces) {
-      try {
-        console.log(this.data)
-        var json = JSON.parse(this.data)
-        this.printManager._processUpdates(json)
-      } catch (e) {
-        console.log('Parse error', e)
-      } finally {
-        this.data = ''
-      }
-    } else {
-      console.log('incomplete packet')
-    }
   }
 
   disconnect (cb = null) {
@@ -104,12 +82,23 @@ class Printer {
       }
     )
   }
+
   // Request the printer configuration
-  requestConfig (cb = null) {
-    this.sendCommand('getconfig')
-    if (cb !== null) cb()
+  requestConfiguration (cb = null) {
+    console.log('Printer configuration requested')
+    // Virtual Printer
+    if (this.isVirtual) {
+      setTimeout(function () {
+        this._sendVirtualCommand('getConfig', cb)
+      }.bind(this), 1000)
+      return
+    }
+    // Real Printer
+    this.sendCommand('getconfig', cb)
   }
+
   sendCommand (command, cb = null) {
+    console.log('Sending command: ', command)
     var cmd = JSON.stringify({'type': command})
     console.log('sending command: ', cmd, ' to: ', this.id)
     this.ble.write(
@@ -127,6 +116,56 @@ class Printer {
       }
     )
   }
+
+  _sendVirtualCommand (command, cb = null) {
+    console.log('Sending virtual command: ', command)
+    if (command === 'getConfig') {
+      var data = JSON.stringify({ 'type': 'printerConfig' })
+      this._onData(this.stringToBytes(data))
+    }
+    if (cb !== null) cb()
+  }
+
+  _onData (data) {
+    // Append data and remove all newlines, tabs, etc.
+    this.data += this.bytesToString(data).replace(/(\r\n\t|\n|\r\t)/gm, '')
+    var numOpenBraces = (this.data.match(/{/g) || []).length
+    var numCloseBraces = (this.data.match(/}/g) || []).length
+    // If the string is a complete json sting i.e. num of { == num of }
+    if (numOpenBraces === numCloseBraces) {
+      try {
+        console.log(this.data)
+        this._processData(JSON.parse(this.data))
+      } catch (e) {
+        console.log('Parse error', e)
+      } finally {
+        this.data = ''
+      }
+    } else {
+      console.log('incomplete packet')
+    }
+  }
+
+  _processData (data) {
+    console.log('Processing data: ', data)
+    // Handle internal messages
+    if (data.type === 'printerConfig') {
+      this.config = data
+      delete this.config['type']
+    }
+    // Pass data to external handler
+    if (this.dataCallback !== null) this.dataCallback(data)
+  }
+
+  _determineWriteType (peripheral) {
+    var characteristic = peripheral.characteristics.filter(function (element) {
+      if (element.characteristic.toLowerCase() === bluefruit.txCharacteristic) {
+        return element
+      }
+    })[0]
+    this.writeMethod = (characteristic.properties.indexOf('WriteWithoutResponse') > -1) ? this.ble.writeWithoutResponse : this.ble.write
+  }
+
   // ASCII only
   bytesToString (buffer) {
     return String.fromCharCode.apply(null, new Uint8Array(buffer))

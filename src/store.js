@@ -21,7 +21,7 @@ const modulePrinter = {
     bleAvailable: false,
     isTestingBLE: false,
     isScanning: false,
-    isPrinting: true,
+    isPrinting: false,
     printProgress: 10
   },
   mutations: {
@@ -103,6 +103,10 @@ const modulePrinter = {
         function () {
           // If connection succeeds, but later connection fails
           commit('addAlert', makeAlert('Connection Error', 'The connection to the printer has failed'))
+        },
+        function (data) {
+          // When data comes in
+          console.log('New Data', data)
         }
       )
     },
@@ -184,6 +188,15 @@ const modulePrinter = {
     },
     getPrintProgress: state => {
       return state.printProgress
+    },
+    getPrinterConfig: state => {
+      if (state.selected === null) return null
+      return state.selected.config
+    },
+    hasPrinterConfig: state => {
+      if (state.selected === null) return false
+      if (state.selected.config === null) return false
+      return true
     }
   }
 }
