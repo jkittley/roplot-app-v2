@@ -30,7 +30,7 @@
           <v-ons-icon fixed-width icon="ion-printer"></v-ons-icon>
           </div>
         <div class="left" v-show="item.isConnecting">
-          <v-ons-icon fixed-width icon="ion-refresh" spin></v-ons-icon> 
+          <v-ons-icon fixed-width icon="fa-refresh" spin></v-ons-icon> 
           </div>
         <div class="center">{{ item.name }}</div>
         <div class="right"><v-ons-button v-show="!isConnecting && !hasPrinter" @click="connectToPrinter(item)" modifier="quiet">Connect</v-ons-button></div>
@@ -51,11 +51,11 @@
         BLE Connection Error
       </div>
       <div class="content">
-        No Bluetooth Low Energy (BLE) connection is available. Please make sure Bluetooth is enabled in your devices settings.
+        No Bluetooth Low Energy (BLE) connection is available. Please make sure Bluetooth is enabled in your device's settings.
         <br><br>
         <v-ons-button v-if="!isTestingBLE" @click="testBLEConnection">Test for BLE Again</v-ons-button>
         <v-ons-button v-else modifier="outline">
-          <v-ons-icon fixed-width icon="ion-refresh" spin></v-ons-icon> 
+          <v-ons-icon fixed-width icon="fa-refresh" spin></v-ons-icon> 
             Testing for BLE...
           </v-ons-button>
       </div>

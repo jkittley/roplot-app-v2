@@ -4,12 +4,25 @@
     
     <v-ons-row vertical-align="top">
 
+      <v-ons-col v-if="!hasPrinter">
+      <div class="header" style="margin:50px;">
+      <img src="../assets/logo-w-text.svg">
+      </div>
+      <v-ons-card class="header">
+        <v-ons-icon size="50px" icon="ion-printer"></v-ons-icon>
+        <h1>Please connect to a printer.</h1>
+      </v-ons-card>
+      </v-ons-col>
+      
       <v-ons-col v-if="hasPrinterConfig">
         <roplot-visualiser v-bind:printer="getPrinter"></roplot-visualiser>    
       </v-ons-col>
 
-      <v-ons-col v-if="!hasPrinterConfig">
-        Waiting for printer configuration...
+      <v-ons-col v-if="hasPrinter && !hasPrinterConfig">
+        <v-ons-card>
+          <v-ons-icon icon="fa-refresh" spin></v-ons-icon>
+          Waiting for printer configuration...
+        </v-ons-card>
       </v-ons-col>
 
       <v-ons-col v-if="!isPrinting && hasPrinterConfig" width="250px" vertical-align="top">
@@ -20,16 +33,23 @@
           <div class="content">
             <div class="manual-controls">
               <v-ons-row vertical-align="top">
-                <v-ons-col width="33%"><v-ons-button class="btn-pen"><v-ons-icon icon="ion-edit"></v-ons-icon><v-ons-icon icon="ion-arrow-up-c"></v-ons-icon></v-ons-button></v-ons-col>
-                <v-ons-col width="33%"><v-ons-button class="btn-dir"><v-ons-icon icon="ion-arrow-up-c"></v-ons-icon></v-ons-button></v-ons-col>
-                <v-ons-col width="33%"><v-ons-button class="btn-pen"><v-ons-icon icon="ion-edit"></v-ons-icon></v-ons-icon><v-ons-icon icon="ion-arrow-down-c"></v-ons-icon></v-ons-button></v-ons-col>
+               <v-ons-col width="33%"></v-ons-col>
+               <v-ons-col width="33%"><v-ons-button class="btn-dir"><v-ons-icon icon="fa-arrow-up"></v-ons-icon></v-ons-button></v-ons-col>
+              </v-ons-row> 
+              <v-ons-row vertical-align="top">
+                <v-ons-col width="33%"><v-ons-button class="btn-dir"><v-ons-icon icon="fa-undo"></v-ons-icon></v-ons-button></v-ons-col>
+                <v-ons-col width="33%"><v-ons-button class="btn-set"><v-ons-icon icon="fa-dot-circle-o"></v-ons-icon></v-ons-button></v-ons-col>
+                <v-ons-col width="33%"><v-ons-button class="btn-dir"><v-ons-icon icon="fa-repeat"></v-ons-icon></v-ons-button></v-ons-col>
               </v-ons-row>
               <v-ons-row vertical-align="top">
-                <v-ons-col width="33%"><v-ons-button class="btn-dir"><v-ons-icon icon="ion-arrow-return-right"></v-ons-icon></v-ons-button></v-ons-col>
-                <v-ons-col width="33%"><v-ons-button class="btn-set"><v-ons-icon icon="ion-android-locate"></v-ons-icon></v-ons-button></v-ons-col>
-                <v-ons-col width="33%"><v-ons-button class="btn-dir"><v-ons-icon icon="ion-arrow-return-left"></v-ons-icon></v-ons-button></v-ons-col>
+                <v-ons-col width="33%"></v-ons-col>
+                <v-ons-col width="33%"><v-ons-button class="btn-dir"><v-ons-icon icon="fa-arrow-down"></v-ons-icon></v-ons-button></v-ons-col>
               </v-ons-row>
-              <v-ons-button class="btn-dir"><v-ons-icon icon="ion-arrow-down-c"></v-ons-icon></v-ons-button>
+              <br><br>
+              <v-ons-button class="btn-pen" v-for="pen in getPrinterConfig.pens" v-bind:key="pen.id">
+                <v-ons-icon icon="fa-pencil" fixed-width></v-ons-icon> {{ pen.pole }} {{ pen.color }}
+              </v-ons-button>
+
             </div>
           </div>
         </v-ons-card>
@@ -67,7 +87,7 @@ import RoplotVisualiser from './RoplotVisualiser'
 export default {
   name: 'vis',
   props: ['myProp'],
-  computed: mapGetters(['getPrinter', 'getPrintProgress', 'getPrinterConfig', 'hasPrinterConfig', 'isPrinting']),
+  computed: mapGetters(['hasPrinter', 'getPrinter', 'getPrintProgress', 'getPrinterConfig', 'hasPrinterConfig', 'isPrinting']),
   components: {
     RoplotVisualiser
   }
@@ -75,17 +95,22 @@ export default {
 </script>
 
 <style>
+.header {
+  text-align: center;
+}
 .manual-controls {
   text-align: center;
 }
-.manual-controls ons-button {
+.manual-controls .btn-dir, .manual-controls .btn-set,  {
   width: 50px;
   text-align: center;
   margin: 5px;
 }
-.manual-controls ons-button ons-icon {
-  padding-bottom: 8px;
+
+ons-button {
+  width: 100%;
 }
+
 .manual-controls .btn-dir {
   background-color: dodgerblue;
 }
@@ -93,22 +118,15 @@ export default {
   background-color: #ccc;
 }
 .manual-controls .btn-pen {
-  background-color:  #ccc;
-}
-.manual-controls ons-button ons-icon {
-  padding-bottom: 8px;
-}
-.printing-controls ons-button {
   width: 100%;
+  margin-bottom: 5px;
 }
-.printing-controls ons-button ons-icon {
-  padding-bottom: 8px;
-}
+
 roplot-visualiser, ons-col, ons-row {
   width: 100%;
   height: 100%;
 }
 ons-col {
-  padding: 10px;
+  padding: 5px;
 }
 </style>

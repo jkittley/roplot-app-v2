@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Roplot Visualiser</title>
+<link href="roplot-visualiser.css" rel="stylesheet">
+<style>
+    body {
+        background-color: #eee;
+        margin: 0;
+        padding: 0;
+    }
+    #roplot {
+        width: 90vw;
+        height: 90vh;
+    }
+</style>
+</head>
+
+<body>
+    <div id="roplot" class="roplot"></div>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="roplot-visualiser.js"></script>
+    <script>
+ 
+        // Initialise the plotter visualisation
+        var plot = new RoplotVis(document.getElementById('roplot'), {})
+        
+        // // Draw a petal
+        // roplotter.run("PD:1");
+        // var config = roplotter.getConfig();
+        // var i=0;
+        // var k=4;
+        // var d=true;
+        // var intervalA = setInterval(function() {
+        //     roplotter.run("RC");
+        //     if (d) {
+        //         roplotter.run(k+"*CO");
+        //     } else {
+        //         roplotter.run(k+"*CI");      
+        //     } 
+        //     if (i>360) { 
+        //         roplotter.run("PD:0, PU:1");
+        //         k = 6; 
+        //     }
+        //     if (i > 0 && Math.ceil(i / config.physical.boomStep) % 40 == 0) d=!d;
+        //     i += config.physical.boomStep;
+        //     if (i>720) {
+        //         clearInterval(intervalA);
+        //     }
+        // }, 30);
+        
+    </script>
+</body>
+</html>

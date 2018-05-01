@@ -13,12 +13,11 @@ export default {
     }
   },
   mounted () {
-    console.log('printer', this.printer)
-    console.log('REFS', this.$refs.lastChild)
     var plot = new RoplotVis(this.$refs.vis, {})
     this.$refs.vis.addEventListener('click', function (event) {
-        console.log(event, event.roplot)
+      console.log(event, event.roplot)
     })
+    plot.run('50*RA')
   }
 }
 </script>

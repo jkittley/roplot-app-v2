@@ -19,13 +19,11 @@
           target="#btn-alerts"
           direction="down"
           @posthide="markAlerts">
-          
           <div class="popover-title">Alerts</div>
           <div class="content alert-message" v-for="alert in getAlerts" v-bind:key="alert.key">
               <strong>{{ alert.title }}</strong><br>
               {{ alert.text }}
           </div>
-      
           <p class="content alert-message" v-if="getAlerts.length===0">
             No messages
           </p>
@@ -37,20 +35,10 @@
 
     <v-ons-tabbar swipeable position="auto"
       :tabs="tabs"
-      v-show="hasPrinter"
+      :visible="hasPrinter"
       :index.sync="activeIndex"
     >
     </v-ons-tabbar>
-
-    <div v-show="!hasPrinter">
-      <div class="header" style="margin:50px;">
-      <img src="../assets/logo-w-text.svg">
-      </div>
-      <v-ons-card>
-        <v-ons-icon size="50px" icon="ion-printer"></v-ons-icon>
-        <h1>Please connect to a printer.</h1>
-      </v-ons-card>
-    </div>
 
   </v-ons-page>
 </template>

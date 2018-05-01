@@ -120,7 +120,43 @@ class Printer {
   _sendVirtualCommand (command, cb = null) {
     console.log('Sending virtual command: ', command)
     if (command === 'getConfig') {
-      var data = JSON.stringify({ 'type': 'printerConfig' })
+      var data = JSON.stringify({
+        'type': 'printerConfig',
+        'rotationSpeed': 10,
+        'beltSpeed': 10,
+        'boomRadius': 500,  // Radius of the boom
+        'boomWidth': 10,    // Width of the boom
+        'boomColor': 'gray',  // Boom colour
+        'drawStart': 100,   // Distance from boom center where carriage stops - inner
+        'drawEnd': 450,     // Distance from boom center where carriage stops - outer
+        'carWidth': 20,     // Carriage Width - axis normal to boom
+        'carHeight': 20,    // Carriage Height - axis parallel to boom
+        'boomStep': 0.9,    // Boom stepper motor step size
+        'carStep': 1.5,     // Carriage stepper motor step size
+        'pens': [{
+          'id': 1,
+          'pole': 'north',  // Which half of the boom is the carriage on. North or South
+          'color': 'red',   // Color of the pen
+          'width': 5,
+          'offset': {      // X Offset of pen tip from center of boom width
+            'x': 25,
+            'y': 0
+          }
+        }, {
+          'id': 2,
+          'pole': 'south',   // Which half of the boom is the carriage on. North or South
+          'color': 'blue',   // Color of the pen
+          'width': 5,
+          'offset': {      // X Offset of pen tip from center of boom width
+            'x': 25,
+            'y': 0
+          }
+        }],
+        'clock': {
+          'tickInterval': 5,    // Interval in degrees between tick marks
+          'LabelInterval': 15   // Interval in degrees between tick labels
+        }
+      })
       this._onData(this.stringToBytes(data))
     }
     if (cb !== null) cb()
