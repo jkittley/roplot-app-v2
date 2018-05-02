@@ -79,8 +79,6 @@ class RoplotVis {
       .attr('viewBox', '0 0 ' + (this.config.boomRadius * 2) + ' ' + (this.config.boomRadius * 2))
 
     this.scaleFactor = d / (this.config.boomRadius * 2)
-    console.log('this.scaleFactor', this.scaleFactor)
-
     this.buildSurface(this.svg)
     this.buildDrawLayer(this.svg)
     this.buildBoom(this.svg)
@@ -163,7 +161,6 @@ class RoplotVis {
   // ----------------------------------------------------
 
   stepBoom (direction) {
-    console.log('Stepping boom')
     if (direction !== ROTATE_AC && direction !== ROTATE_CW) throw new Error('Unknown direction')
     var d = (direction === ROTATE_AC) ? -1 : 1
     this.boomAngle = this.boomAngle + (this.config.boomStep * d)
@@ -389,8 +386,6 @@ class RoplotVis {
   }
 
   run (cmdStr) {
-    console.log('Running RAT', cmdStr)
-
     var parsedInstructions = RAT.parse(cmdStr)
 
     // Execute parsed instructions

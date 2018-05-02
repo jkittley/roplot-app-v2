@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import RAT from './assets/rolang-rat'
 import { Command, cmdGetConfig, cmdRAT, cmdPrintProgress } from './assets/rolang-chat'
 
@@ -50,7 +51,7 @@ class Printer {
         // Notify connection made
         if (cbConnect !== null) cbConnect()
       } catch (error) {
-        console.log('error', error)
+        Vue.$log.error('onConnect', error)
         this.isConnecting = false
         if (cbDisconnect !== null) cbConnectFail()
       }
@@ -104,18 +105,18 @@ class Printer {
       bluefruit.txCharacteristic,
       this.stringToBytes(command.toString()),
       function (e) {
-        console.log('ACK')
+        Vue.$log.debug('Printer: ACK')
         if (cb !== null) cb(e, true)
       },
       function (e) {
-        console.log('No ACK')
+        Vue.$log.debug('Printer: No ACK')
         if (cb !== null) cb(e, false)
       }
     )
   }
 
   _sendVirtualCommand (command, cb = null) {
-    console.log('Sending virtual command: ', command)
+    Vue.$log.debug('Printer: Sending virtual command: ', command)
 
     // Callback to say command sent
     if (cb !== null) cb()
@@ -179,7 +180,7 @@ class Printer {
           of: unpacked.length
         })
         this._onData(this.stringToBytes(cmd.toString()))
-        console.log(i)
+        Vue.$log.debug(i)
         i--
         if (i < 1) clearInterval(ticker)
       }.bind(this), 500)
@@ -196,12 +197,12 @@ class Printer {
       try {
         this._processData(this.data)
       } catch (e) {
-        console.log('Parse error', e)
+        Vue.$log.debug('Printer: Parse error', e)
       } finally {
         this.data = ''
       }
     } else {
-      console.log('incomplete packet')
+      Vue.$log.debug('Printer: incomplete packet')
     }
   }
 

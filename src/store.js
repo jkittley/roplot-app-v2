@@ -1,9 +1,24 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import VueLogger from 'vuejs-logger'
 import Printer from './printer'
 import * as CHAT from './assets/rolang-chat'
 
 Vue.use(Vuex)
+Vue.use(VueLogger, {
+  // required ['debug', 'info', 'warn', 'error', 'fatal']
+  logLevel: 'debug',
+  // optional : defaults to false if not specified
+  stringifyArguments: false,
+  // optional : defaults to false if not specified
+  showLogLevel: false,
+  // optional : defaults to false if not specified
+  showMethodName: false,
+  // optional : defaults to '|' if not specified
+  separator: '|',
+  // optional : defaults to false if not specified
+  showConsoleColors: false
+})
 
 const makeAlert = function (title, msg) {
   return {
@@ -28,44 +43,44 @@ const modulePrinter = {
   },
   mutations: {
     emptyPrinterList (state) {
-      console.log('Mutation: Emptying printer list')
+      Vue.$log.debug('Mutation: Emptying printer list')
       state.printers = []
     },
     addPrinterToList (state, printer) {
-      console.log('Mutation: Adding printer')
+      Vue.$log.debug('Mutation: Adding printer')
       state.printers.push(printer)
     },
     setSelectedPrinter (state, printer) {
-      console.log('Mutation: Setting selected to: ', printer.name)
+      Vue.$log.debug('Mutation: Setting selected to: ', printer.name)
       printer.isConnecting = false
       state.selected = printer
     },
     unsetSelectedPrinter (state) {
-      console.log('Mutation: Unsetting selected')
+      Vue.$log.debug('Mutation: Unsetting selected')
       state.selected = null
     },
     setBleAvailable (state, value) {
-      console.log('Mutation: Setting BLE available to: ', value)
+      Vue.$log.debug('Mutation: Setting BLE available to: ', value)
       state.bleAvailable = value
     },
     setIsTestingBLE (state, value) {
-      console.log('Mutation: setIsTestingBLE:', value)
+      Vue.$log.debug('Mutation: setIsTestingBLE:', value)
       state.isTestingBLE = value
     },
     setIsScanning (state, value) {
-      console.log('Mutation: setIsScanning:', value)
+      Vue.$log.debug('Mutation: setIsScanning:', value)
       state.isScanning = value
     },
     addAlert (state, msg) {
-      console.log('Mutation: addAlert:', msg)
+      Vue.$log.debug('Mutation: addAlert:', msg)
       state.alerts.push(msg)
     },
     setAlertSeenTo (state, payload) {
-      console.log('Mutation: setAlertSeenTo:', payload)
+      Vue.$log.debug('Mutation: setAlertSeenTo:', payload)
       payload.alert.seen = payload.value
     },
     addPrintUpdate (state, payload) {
-      console.log('Mutation: addPrintUpdate:', payload)
+      Vue.$log.debug('Mutation: addPrintUpdate:', payload)
       state.printUpdates.push(payload)
     }
   },
@@ -92,10 +107,10 @@ const modulePrinter = {
             commit('addAlert', makeAlert('Scan Error', 'Failed to stop scanning'))
           }
       )
-      console.log('Action: Refreshing printer list')
+      Vue.$log.debug('Action: Refreshing printer list')
     },
     connectToPrinter ({ commit }, printer) {
-      console.log('Action: Connecting to printer', printer)
+      Vue.$log.debug('Action: Connecting to printer', printer)
       printer.isConnecting = true
       printer.connect(
         function () {
@@ -112,20 +127,20 @@ const modulePrinter = {
         },
         function (command) {
           // When data comes in
-          console.log('New Data', command)
+          Vue.$log.debug('Action (Data callback): ', command)
           if (command.getType() === CHAT.cmdPrintProgress) commit('addPrintUpdate', command)
         }
       )
     },
     disconnectPrinter ({ commit, state }) {
-      console.log('Action: Disconnecting printer')
+      Vue.$log.debug('Action: Disconnecting printer')
       state.selected.disconnect(function (error) {
         if (error) commit('addAlert', makeAlert('Disconnection Error', 'Failed to verify disconnection'))
         commit('unsetSelectedPrinter')
       })
     },
     testBLEConnection ({ commit }) {
-      console.log('Action: Testing BLE connection')
+      Vue.$log.debug('Action: Testing BLE connection')
       commit('setIsTestingBLE', true)
       try {
         window.ble.isEnabled(
@@ -143,13 +158,13 @@ const modulePrinter = {
       }
     },
     markAllAlertsAsSeen: function ({ commit, state }) {
-      console.log('Action: marking all alerts as seen')
+      Vue.$log.debug('Action: marking all alerts as seen')
       for (let item of state.alerts) {
         commit('setAlertSeenTo', { alert: item, value: true })
       }
     },
     sendCommand: function ({ commit, state }, command, waitForResponse = false) {
-      console.log('Action: Sending command', command, 'waitForResponse:', waitForResponse)
+      Vue.$log.debug('Action: Sending command', command, 'waitForResponse:', waitForResponse)
       state.selected.sendCommand(command)
     }
   },

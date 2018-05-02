@@ -17,14 +17,13 @@ export default {
   mounted () {
     this.plot = new RoplotVis(this.$refs.vis, {})
     this.$refs.vis.addEventListener('click', function (event) {
-      console.log(event, event.roplot)
+      console.log('Vis Component (listener):', event, event.roplot)
     })
   },
   computed: mapGetters(['getPrinterUpdates']),
   watch: {
     getPrinterUpdates: function (val) {
       var updCommand = val[val.length - 1]
-      console.log('Updating plot', updCommand)
       if (updCommand.getType() === cmdPrintProgress) {
         var d = updCommand.getData()
         console.log('Visualiser: ', d)
