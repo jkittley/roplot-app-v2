@@ -91,6 +91,7 @@ import { mapGetters, mapActions } from 'vuex'
 import RoplotVisualiser from './RoplotVisualiser'
 import PleaseConnect from './PleaseConnect'
 import { Command, cmdRAT, cmdStop } from '../assets/rolang-chat'
+import { RAT, PEN_UP, PEN_DOWN, CAR_OUT, CAR_IN, ROTATE_CW, ROTATE_CCW } from '../assets/rolang-rat'
 
 export default {
   name: 'vis',
@@ -107,34 +108,34 @@ export default {
   methods: {
     ...mapActions(['sendCommand']),
     rotateCW () {
-      var cmd = new Command(cmdRAT, ['RC', 'RC', 'RC', 'RC', 'RC', 'RC'])
+      var cmd = new Command(cmdRAT, [RAT.create(ROTATE_CW)])
       this.sendCommand(cmd)
     },
     rotateCCW () {
-      var cmd = new Command(cmdRAT, ['RA'])
+      var cmd = new Command(cmdRAT, [RAT.create(ROTATE_CCW)])
       this.sendCommand(cmd)
     },
     carOut () {
-      var cmd = new Command(cmdRAT, ['CO'])
+      var cmd = new Command(cmdRAT, [RAT.create(CAR_OUT)])
       this.sendCommand(cmd)
     },
     carIn () {
-      var cmd = new Command(cmdRAT, ['CI'])
+      var cmd = new Command(cmdRAT, [RAT.create(CAR_IN)])
       this.sendCommand(cmd)
     },
     center () {
       // this.getPrinter().sendCommand('')
     },
     penUp (penID) {
-      var cmd = new Command(cmdRAT, ['PU:' + penID])
+      var cmd = new Command(cmdRAT, [RAT.create(PEN_UP).param(penID)])
       this.sendCommand(cmd)
     },
     penDown (penID) {
-      var cmd = new Command(cmdRAT, ['PD:' + penID])
+      var cmd = new Command(cmdRAT, [RAT.create(PEN_DOWN).param(penID)])
       this.sendCommand(cmd)
     },
     stop () {
-      var cmd = new Command(cmdStop, null)
+      var cmd = new Command(cmdStop)
       this.sendCommand(cmd)
     }
   }

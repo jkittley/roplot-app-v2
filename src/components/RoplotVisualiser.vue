@@ -5,7 +5,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import RoplotVis from '../assets/roplot-visualiser'
-import * as CHAT from '../assets/rolang-chat'
+import { cmdPrintProgress } from '../assets/rolang-chat'
 
 export default {
   props: ['printer'],
@@ -25,9 +25,10 @@ export default {
     getPrinterUpdates: function (val) {
       var updCommand = val[val.length - 1]
       console.log('Updating plot', updCommand)
-      if (updCommand.getType() === CHAT.cmdPrintProgress) {
-        console.log(updCommand.getData())
-        // this.plot.run()
+      if (updCommand.getType() === cmdPrintProgress) {
+        var d = updCommand.getData()
+        console.log('Visualiser: ', d)
+        this.plot.run(d.rat)
       }
     }
   }

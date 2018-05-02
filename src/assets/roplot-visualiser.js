@@ -395,7 +395,7 @@ class RoplotVis {
 
     // Execute parsed instructions
     parsedInstructions.forEach(function (instruction, i) {
-      for (var j = 0; j < instruction.repeats; j++) {
+      for (var j = 0; j < instruction.getNumExec(); j++) {
         var lines = {}
         for (var k in this.penState) {
           if (this.penState[k] === PEN_DOWN) {
@@ -403,14 +403,14 @@ class RoplotVis {
           }
         }
 
-        switch (instruction.cmd) {
+        switch (instruction.getType()) {
           case 'PU':
-            this.setPenState(instruction.param, PEN_UP)
+            this.setPenState(instruction.getParam(), PEN_UP)
             break
           case 'PD':
-            this.setPenState(instruction.param, PEN_DOWN)
+            this.setPenState(instruction.getParam(), PEN_DOWN)
             var pos = this.polarToCart(this.boomAngle, this.physicalBeltPos)
-            this.drawCircle(this.config.pens[instruction.param], pos.x, pos.y)
+            this.drawCircle(this.config.pens[instruction.getParam()], pos.x, pos.y)
             break
           case 'RC':
             this.stepBoom(ROTATE_CW)

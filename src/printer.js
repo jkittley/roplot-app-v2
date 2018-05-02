@@ -1,5 +1,5 @@
 import RAT from './assets/rolang-rat'
-import { Command, cmdGetConfig } from './assets/rolang-chat'
+import { Command, cmdGetConfig, cmdRAT, cmdPrintProgress } from './assets/rolang-chat'
 
 const bluefruit = {
   serviceUUID: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
@@ -22,7 +22,6 @@ class Printer {
   }
 
   connect (cbConnect = null, cbConnectFail = null, cbDisconnect = null, cbData = null) {
-    console.log('Connecting to printer: ', this.id)
     this.dataCallback = cbData
     this.isConnected = false
     this.isConnecting = true
@@ -35,7 +34,7 @@ class Printer {
         this.requestConfiguration()
         // Notify connection made
         cbConnect()
-      }.bind(this), 2000)
+      }.bind(this), 1000)
       return
     }
 
@@ -88,7 +87,6 @@ class Printer {
 
   // Request the printer configuration
   requestConfiguration (cb = null) {
-    console.log('Printer configuration requested')
     var cmd = new Command(cmdGetConfig, null)
     this.sendCommand(cmd, cb)
   }
@@ -100,8 +98,6 @@ class Printer {
       return
     }
     // Real printer
-    console.log('Sending command: ', command, ' to: ', this.id)
-
     this.ble.write(
       this.id,
       bluefruit.serviceUUID,
@@ -124,7 +120,7 @@ class Printer {
     // Callback to say command sent
     if (cb !== null) cb()
 
-    if (command.type.toLowerCase() === 'getconfig') {
+    if (command.getType() === cmdGetConfig) {
       var fakeResponseData = JSON.stringify({
         'type': 'printerConfig',
         'rotationSpeed': 10,
@@ -166,29 +162,26 @@ class Printer {
       setTimeout(function () {
         var cmd = new Command(cmdGetConfig, fakeResponseData)
         this._onData(this.stringToBytes(cmd.toString()))
-      }.bind(this), 1000)
+      }.bind(this), 500)
       //
-    } else if (command.type.toLowerCase() === 'rat') {
+    } else if (command.getType() === cmdRAT) {
       //
-      var instructions = RAT.parse(command.rat)
-      var unpacked = RAT.unpack(instructions)
+      var parsed = RAT.parse(command.getData())
+      var unpacked = RAT.unpack(parsed)
 
-      this._onData(this.stringToBytes(JSON.stringify({
-        type: 'startedPrinting',
-        count: instructions.length
-      })))
+      var i = unpacked.length - 1
 
-      var i = unpacked.length
       var ticker = setInterval(function () {
-        if (i === 0) clearInterval(ticker)
         var instruction = unpacked[i]
-        this._onData(this.stringToBytes(JSON.stringify({
-          type: 'progressUpd',
-          rat: instruction,
+        var cmd = new Command(cmdPrintProgress, {
+          rat: instruction.toString(),
           i: i,
-          count: unpacked.length
-        })))
+          of: unpacked.length
+        })
+        this._onData(this.stringToBytes(cmd.toString()))
+        console.log(i)
         i--
+        if (i < 1) clearInterval(ticker)
       }.bind(this), 500)
     }
   }
@@ -201,7 +194,6 @@ class Printer {
     // If the string is a complete json sting i.e. num of { == num of }
     if (numOpenBraces === numCloseBraces) {
       try {
-        console.log(this.data)
         this._processData(this.data)
       } catch (e) {
         console.log('Parse error', e)
@@ -215,7 +207,6 @@ class Printer {
 
   _processData (data) {
     var cmd = Command.fromString(data)
-    console.log('Processing received command: ', cmd)
     // Handle internal messages
     if (cmd.getType() === cmdGetConfig) {
       this.config = cmd.getData()
